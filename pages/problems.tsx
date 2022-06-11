@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Problems.module.css";
 import React from "react";
-import { Card } from "semantic-ui-react";
+import { Card, Icon } from "semantic-ui-react";
 
 type Problem = {
   id: number;
@@ -27,8 +27,16 @@ const Problems: NextPage = () => {
         <div className={styles.title}>問題一覧</div>
         <Card.Group className={styles.problems}>
           {problems.map((problem) => (
-            <Card fluid key={problem.id} color="red" header={problem.title} />
+            <Card fluid key={problem.id}>
+              <Card.Content>{problem.title}</Card.Content>
+            </Card>
           ))}
+          <Card fluid key={problems.length}>
+            <Card.Content>
+              <Icon name="plus" className={styles.plusIcon}/>
+              追加する
+            </Card.Content>
+          </Card>
         </Card.Group>
       </main>
 
