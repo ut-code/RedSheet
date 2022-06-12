@@ -15,7 +15,7 @@ type Problem = {
 
 const Problems: NextPage = () => {
 
-  const [problems, setProblems] = useState<Problem>([
+  const [problems, setProblems] = useState<Problem[]>([
     { id: 1, title: "math" },
     { id: 2, title: "science" },
   ]);
