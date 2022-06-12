@@ -14,7 +14,7 @@ export default async function getProblemData(
         id: parseInt(id),
       },
     });
-    console.log(problem);
+    response.status(200).json(problem)
   }
   response.end(`Post:${id}`);
 }
