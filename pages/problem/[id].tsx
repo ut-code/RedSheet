@@ -4,38 +4,51 @@ import Image from "next/image";
 import styles from "./Problem.module.css";
 import React, { useState, useEffect } from "react";
 import { Header, Form, Container, Button, TextArea } from "semantic-ui-react";
+import { useRouter } from "next/router";
 
 type Problem = {
   id: number;
   title: string;
-  text: string;
+  content: string;
 };
 
-const Problem: NextPage = () => {
-  const problem: Problem = {
-    id: 2,
-    title: "science",
-    text: "すべての「物」は，<<<質量（重さ）>>>と<<<体積>>>をもっている。鉄などの固体は一定の形と体積があり，力を加えなければ変形しない。水などの液体は一定の体積をもつが一定の形はもたず，形はそれが入っている容器の形に従う。塩素などの気体は一定の体積と形をもたず，体積はそれが入っている容器の容積に，形はそれが入っている容器の形に従う。物を形や大きさなど外見に着目した場合，その物を<<<物体>>>という。例えば，コップといった場合，「液体が入れられる形」，「手でもてる程度の大きさ」といった外見があるので物体である。コップが割れるなどした場合，形・大きさはあるので物体ではあるがコップではなくなる（別の物体になる）。物をつくっている<<<材料>>>に着目した場合，その材料を<<<物質>>>という。",
-  };
-  const splitPattern = new RegExp(/<<<|>>>/, "i");
+const splitPattern = new RegExp(/<<<|>>>/, "i");
+
+const ProblemPage: NextPage = () => {
+  const [problem, setProblem] = useState<Problem | null>(null);
+  const router = useRouter();
+  useEffect(() => {
+    if (!router.query.id) return;
+    (async () => {
+      const response = await fetch(`/api/problems/${router.query.id}`);
+      const problem: Problem = await response.json();
+      setProblem(problem);
+      setRawText(problem.content);
+      setContents(problem.content.split(splitPattern));
+    })();
+  }, [router.query.id]);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [rawText, setRawText] = useState<string>(problem.text);
-  const [contents, setContents] = useState<string[]>(
-    rawText.split(splitPattern)
-  );
+  const [rawText, setRawText] = useState<string>("");
+  const [contents, setContents] = useState<string[]>([]);
   const [isCovered, setIsCovered] = useState<boolean>(true);
   const changeCoverState = () => {
     isCovered ? setIsCovered(false) : setIsCovered(true);
   };
   const cancelUpdateContent = () => {
-    setRawText(problem.text);
+    setRawText("");
     setIsEdit(false);
-    setIsCovered(true)
+    setIsCovered(true);
   };
-  const updateContent = () => {
+  const updateContent = async() => {
     setContents(rawText.split(splitPattern));
     setIsEdit(false);
-    setIsCovered(true)
+    setIsCovered(true);
+    await fetch("/api/addProblem",{
+      method: "post",
+      headers: { "Content-Type":"application/json"},
+      body: JSON.stringify({title: problem?.title, content: problem?.content}),
+    })
+    
   };
 
   return (
@@ -48,7 +61,7 @@ const Problem: NextPage = () => {
 
       <main className={styles.main}>
         <Header as="h2" className={styles.title}>
-          {problem.title}
+          {problem ? problem.title : "読み込み中です"}
         </Header>
         <div className={styles.content}>
           {isEdit ? (
@@ -125,4 +138,4 @@ const Problem: NextPage = () => {
   );
 };
 
-export default Problem;
+export default ProblemPage;
