@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Icon } from "semantic-ui-react";
 import getProblemsData from "../api/getProblemsData";
 import { responseSymbol } from "next/dist/server/web/spec-compliant/fetch-event";
+import Link from "next/link";
 const postSendApi = "pages/api/addProblem";
 
 type Problem = {
@@ -13,33 +14,18 @@ type Problem = {
   title: string;
 };
 
+const getMessagesApi = "/api/getProblemsData";
+
 const Problems: NextPage = () => {
+  const [problems, setProblems] = useState<Problem[]>([]);
 
-  const [problems, setProblems] = useState<Problem[]>([
-    { id: 1, title: "math" },
-    { id: 2, title: "science" },
-  ]);
 
-  const getMessagesApi = "/api/getProblemsData";
   useEffect(() => {
-    const timerId = setInterval(async () => {
+    (async () => {
       const response = await fetch(getMessagesApi);
       setProblems(await response.json());
-    }, 5000);
-
-    // useEffect フックに指定した関数の戻り値に指定した関数はコンポーネントの破棄時に実行される
-    return () => {
-      clearInterval(timerId);
-    };
+    })();
   }, []);
-
-  console.log("problems:");
-  console.log(problems);
-
-  // const problems: Problem[] = [
-  //   { id: 1, title: "math" },
-  //   { id: 2, title: "science" },
-  // ];
 
   return (
     <div className={styles.container}>
@@ -53,9 +39,11 @@ const Problems: NextPage = () => {
         <div className={styles.title}>問題一覧</div>
         <Card.Group className={styles.problems}>
           {problems.map((problem) => (
-            <Card fluid key={problem.id}>
-              <Card.Content>{problem.title}</Card.Content>
-            </Card>
+            <Link key={problem.id} href={`/problem/${problem.id}`}>
+              <Card fluid as="a">
+                <Card.Content>{problem.title}</Card.Content>
+              </Card>
+            </Link>
           ))}
             <Card fluid key={problems.length}>
               <Card.Content>
