@@ -2,8 +2,11 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "./Problems.module.css";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Icon } from "semantic-ui-react";
+import getProblemsData from "../api/getProblemsData";
+import { responseSymbol } from "next/dist/server/web/spec-compliant/fetch-event";
+const postSendApi = "pages/api/addProblem";
 
 type Problem = {
   id: number;
@@ -11,10 +14,33 @@ type Problem = {
 };
 
 const Problems: NextPage = () => {
-  const problems: Problem[] = [
+
+  const [problems, setProblems] = useState<Problem>([
     { id: 1, title: "math" },
     { id: 2, title: "science" },
-  ];
+  ]);
+
+  const getMessagesApi = "/api/getProblemsData";
+  useEffect(() => {
+    const timerId = setInterval(async () => {
+      const response = await fetch(getMessagesApi);
+      setProblems(await response.json());
+    }, 5000);
+
+    // useEffect フックに指定した関数の戻り値に指定した関数はコンポーネントの破棄時に実行される
+    return () => {
+      clearInterval(timerId);
+    };
+  }, []);
+
+  console.log("problems:");
+  console.log(problems);
+
+  // const problems: Problem[] = [
+  //   { id: 1, title: "math" },
+  //   { id: 2, title: "science" },
+  // ];
+
   return (
     <div className={styles.container}>
       <Head>
@@ -31,12 +57,12 @@ const Problems: NextPage = () => {
               <Card.Content>{problem.title}</Card.Content>
             </Card>
           ))}
-          <Card fluid key={problems.length}>
-            <Card.Content>
-              <Icon name="plus" className={styles.plusIcon}/>
-              追加する
-            </Card.Content>
-          </Card>
+            <Card fluid key={problems.length}>
+              <Card.Content>
+                <Icon name="plus" className={styles.plusIcon}/>
+                追加する!
+              </Card.Content>
+            </Card>
         </Card.Group>
       </main>
 
